@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estudiantes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 95%;
+            max-width: 1200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Login Styles */
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .login-form h2 {
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .dashboard-header h1 {
+            color: #333;
+            font-size: 2.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info span {
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Students Table */
+        .students-section {
+            margin-top: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .students-table th,
+        .students-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .students-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .students-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-header h3 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .students-table {
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Login Section -->
+    <div id="login-section" class="login-section">
+        <form class="login-form" id="login-form">
+            <h2>Iniciar Sesion</h2>
+            <div id="login-alert"></div>
+
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn">
+                <span id="login-btn-text">Iniciar Sesion</span>
+                <span id="login-loading" class="loading hidden"></span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="dashboard-section hidden">
+        <div class="dashboard-header">
+            <h1>Registro universitario</h1>
+            <div class="user-info">
+                <span id="current-user">Usuario: </span>
+                <button class="btn btn-secondary" onclick="logout()">Cerrar Sesion</button>
+            </div>
+        </div>
+
+        <div id="dashboard-alert"></div>
+
+        <div class="students-section">
+            <div class="section-header">
+                <h2>Lista de Estudiantes</h2>
+                <button class="btn" onclick="openModal('create')">Agregar Estudiante</button>
+            </div>
+
+            <table class="students-table" id="students-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Email</th>
+                    <th>Numero Inscripcion</th>
+                    <th>Estado</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="students-tbody">
+                <!-- Students will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Create/Edit Student -->
+<div id="student-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Agregar Estudiante</h3>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+
+        <div id="modal-alert"></div>
+
+        <form id="student-form">
+            <input type="hidden" id="student-id">
+
+            <div class="form-group">
+                <label for="student-name">Nombre:</label>
+                <input type="text" id="student-name" name="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="student-apellido">Apellido:</label>
+                <input type="text" id="student-lname" name="apellido" required>
+            </div>
+            <div class="form-group">
+                <label for="student-email">Email:</label>
+                <input type="email" id="student-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="student-num">Numero inscripcion:</label>
+                <input type="text" id="student-age" name="numeroInscripcion" required>
+            </div>
+            <div class="form-group">
+                <label for="student-estado">Estado:</label>
+                <input type="text" id="student-career" name="estado" required>
+            </div>
+            <div class="form-group">
+                <label for="student-fecha-nacimiento">Fecha de Nacimiento:</label>
+                <input type="date" id="student-fecha-nacimiento" name="fechaNacimiento" required>
+            </div>
+        </form>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button type="button" class="btn btn-success" onclick="saveStudent()">
+                <span id="save-btn-text">Guardar</span>
+                <span id="save-loading" class="loading hidden"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Delete Student (Baja Lógica) -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Dar de Baja Estudiante</h3>
+            <span class="close" onclick="closeDeleteModal()">&times;</span>
+        </div>
+
+        <div id="delete-modal-alert"></div>
+
+        <form id="delete-form">
+            <input type="hidden" id="delete-student-id">
+            
+            <div class="form-group">
+                <label for="motivo-baja">Motivo de Baja:</label>
+                <input type="text" id="motivo-baja" name="motivoBaja" required placeholder="Ej: Traslado, Deserción, Graduación, etc.">
+            </div>
+        </form>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+            <button type="button" class="btn btn-danger" onclick="confirmDeleteStudent()">
+                <span id="delete-btn-text">Confirmar Baja</span>
+                <span id="delete-loading" class="loading hidden"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:8080/api'; // Ajusta seg�n tu configuraci�n
+    let authToken = null;
+    let currentMode = 'create'; // 'create' or 'edit'
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user is already logged in
+        const token = sessionStorage.getItem('authToken');
+        if (token) {
+            authToken = token;
+            showDashboard();
+            loadStudents();
+        }
+
+        // Setup form handlers
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveStudent();
+        });
+    });
+
+    // Authentication Functions
+    async function handleLogin(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        setLoginLoading(true);
+        clearAlert('login-alert');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            console.log('Login response:', data); // Debug
+
+            if (response.ok) {
+                // Asegura que el token se obtiene correctamente
+                authToken = data.token || data.accessToken || data.jwt || null;
+                console.log('Token JWT recibido y guardado:', authToken); // Debug
+                if (!authToken) {
+                    showAlert('login-alert', 'No se recibió token JWT del backend', 'error');
+                    return;
+                }
+                sessionStorage.setItem('authToken', authToken);
+                sessionStorage.setItem('username', username);
+
+                showAlert('login-alert', 'Login exitoso!', 'success');
+                setTimeout(() => {
+                    showDashboard();
+                    loadStudents();
+                }, 1000);
+            } else {
+                showAlert('login-alert', data.message || 'Error en el login', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showAlert('login-alert', 'Error de conexion con el servidor', 'error');
+        } finally {
+            setLoginLoading(false);
+        }
+    }
+
+    function logout() {
+        authToken = null;
+        sessionStorage.removeItem('authToken');
+        sessionStorage.removeItem('username');
+
+        document.getElementById('login-section').classList.remove('hidden');
+        document.getElementById('dashboard-section').classList.add('hidden');
+
+        // Clear form
+        document.getElementById('login-form').reset();
+        clearAlert('login-alert');
+    }
+
+    function showDashboard() {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard-section').classList.remove('hidden');
+
+        const username = sessionStorage.getItem('username') || 'Usuario';
+        document.getElementById('current-user').textContent = `Usuario: ${username}`;
+    }
+
+    // Student CRUD Functions
+    async function loadStudents() {
+        try {
+            if (!authToken) {
+                console.warn('No hay token JWT presente al intentar cargar estudiantes'); // Debug
+                logout();
+                return;
+            }
+            console.log('Enviando token JWT en loadStudents:', authToken); // Debug
+            const response = await fetch(`${API_BASE_URL}/estudiantes`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log('Load students status:', response.status); // Debug
+            if (response.ok) {
+                const students = await response.json();
+                displayStudents(students);
+            } else if (response.status === 401 || response.status === 403) {
+                showAlert('dashboard-alert', 'Sesión expirada o no autorizada. Por favor, inicia sesión de nuevo.', 'error');
+                logout();
+            } else {
+                showAlert('dashboard-alert', 'Error al cargar estudiantes', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading students:', error);
+            showAlert('dashboard-alert', 'Error de conexion 1', 'error');
+        }
+    }
+
+    function displayStudents(students) {
+        const tbody = document.getElementById('students-tbody');
+        tbody.innerHTML = '';
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.nombre}</td>
+                    <td>${student.apellido}</td>
+                    <td>${student.email}</td>
+                    <td>${student.numeroInscripcion}</td>
+                    <td>${student.estado}</td>
+                    <td>${student.fechaNacimiento ? student.fechaNacimiento : ''}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-secondary" onclick="editStudent(${student.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteStudent(${student.id})">Eliminar</button>
+                        </div>
+                    </td>
+                `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function saveStudent() {
+        const form = document.getElementById('student-form');
+        const formData = new FormData(form);
+        const fechaNacimiento = document.getElementById('student-fecha-nacimiento').value;
+        console.log('Valor de fechaNacimiento leído del input:', fechaNacimiento); // Debug
+        const username = sessionStorage.getItem('username') || '';
+        // Formatear la fecha actual a dd/MM/YYYY
+        function formatDateDDMMYYYY(date) {
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${year}-${month}-${day}`;
+        }
+        const now = new Date();
+        const fechaAltaFormateada = formatDateDDMMYYYY(now);
+        const fechaModificacionFormateada = formatDateDDMMYYYY(now);
+        const studentData = {
+            nombre: formData.get('nombre'),
+            apellido: formData.get('apellido'),
+            email: formData.get('email'),
+            numeroInscripcion: formData.get('numeroInscripcion'),
+            estado: formData.get('estado'),
+            fechaNacimiento: fechaNacimiento,
+            usuarioAlta: currentMode === 'create' ? username : undefined,
+            usuarioModificacion: currentMode === 'edit' ? username : undefined,
+            fechaAlta: currentMode === 'create' ? fechaAltaFormateada : undefined,
+            fechaModificacion: currentMode === 'edit' ? fechaModificacionFormateada : undefined
+        };
+        setSaveLoading(true);
+        clearAlert('modal-alert');
+        try {
+            if (!authToken) {
+                console.warn('No hay token JWT presente al intentar guardar estudiante'); // Debug
+                logout();
+                return;
+            }
+            console.log('Enviando token JWT en saveStudent:', authToken); // Debug
+            console.log('JSON enviado en saveStudent:', JSON.stringify(studentData)); // Debug
+            let response;
+            if (currentMode === 'create') {
+                // Elimina campos undefined para evitar enviarlos en el JSON
+                const cleanData = Object.fromEntries(Object.entries(studentData).filter(([_, v]) => v !== undefined));
+                response = await fetch(`${API_BASE_URL}/estudiantes`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cleanData)
+                });
+            } else {
+                const studentId = document.getElementById('student-id').value;
+                const editData = {...studentData, id: parseInt(studentId)};
+                const cleanEditData = Object.fromEntries(Object.entries(editData).filter(([_, v]) => v !== undefined));
+                console.log('JSON enviado en editStudent:', JSON.stringify(cleanEditData)); // Debug
+                response = await fetch(`${API_BASE_URL}/estudiantes/${studentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cleanEditData)
+                });
+            }
+            console.log('Save student status:', response.status); // Debug
+            if (response.ok) {
+                showAlert('dashboard-alert',
+                    currentMode === 'create' ? 'Estudiante creado exitosamente' : 'Estudiante actualizado exitosamente',
+                    'success');
+                closeModal();
+                loadStudents();
+            } else if (response.status === 401 || response.status === 403) {
+                showAlert('modal-alert', 'Sesión expirada o no autorizada. Por favor, inicia sesión de nuevo.', 'error');
+                logout();
+            } else {
+                const errorData = await response.json();
+                showAlert('modal-alert', errorData.message || 'Error al guardar estudiante', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving student:', error);
+            showAlert('modal-alert', 'Error de conexión', 'error');
+        } finally {
+            setSaveLoading(false);
+        }
+    }
+
+    async function editStudent(id) {
+        try {
+            if (!authToken) {
+                console.warn('No hay token JWT presente al intentar editar estudiante'); // Debug
+                logout();
+                return;
+            }
+            console.log('Enviando token JWT en editStudent:', authToken); // Debug
+            const response = await fetch(`${API_BASE_URL}/estudiantes/${id}/lock`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log('Edit student status:', response.status); // Debug
+            if (response.ok) {
+                const student = await response.json();
+                document.getElementById('student-id').value = student.id;
+                document.getElementById('student-name').value = student.nombre;
+                document.getElementById('student-lname').value = student.apellido;
+                document.getElementById('student-email').value = student.email;
+                document.getElementById('student-age').value = student.numeroInscripcion;
+                document.getElementById('student-career').value = student.estado;
+                document.getElementById('student-fecha-nacimiento').value = student.fechaNacimiento ? student.fechaNacimiento : '';
+                openModal('edit');
+            } else if (response.status === 401 || response.status === 403) {
+                showAlert('dashboard-alert', 'Sesión expirada o no autorizada. Por favor, inicia sesión de nuevo.', 'error');
+                logout();
+            } else {
+                showAlert('dashboard-alert', 'Error al cargar datos del estudiante', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading student:', error);
+            showAlert('dashboard-alert', 'Error de conexión', 'error');
+        }
+    }
+
+    function deleteStudent(id) {
+        // Abrir el modal de baja lógica
+        document.getElementById('delete-student-id').value = id;
+        document.getElementById('delete-form').reset();
+        clearAlert('delete-modal-alert');
+        document.getElementById('delete-modal').style.display = 'block';
+    }
+    
+    async function confirmDeleteStudent() {
+        const studentId = document.getElementById('delete-student-id').value;
+        const motivoBaja = document.getElementById('motivo-baja').value;
+        
+        if (!motivoBaja.trim()) {
+            showAlert('delete-modal-alert', 'Por favor, ingrese un motivo de baja', 'error');
+            return;
+        }
+        
+        setDeleteLoading(true);
+        clearAlert('delete-modal-alert');
+        
+        try {
+            if (!authToken) {
+                console.warn('No hay token JWT presente al intentar dar de baja al estudiante'); // Debug
+                logout();
+                return;
+            }
+            
+            const username = sessionStorage.getItem('username') || '';
+            const now = new Date();
+            const fechaBaja = formatDateDDMMYYYY(now);
+            
+            // Datos para la baja lógica
+            const bajaData = {
+                estado: "inactivo",
+                motivoBaja: motivoBaja,
+                usuarioBaja: username,
+                fechaBaja: fechaBaja
+            };
+            
+            console.log('Enviando token JWT en confirmDeleteStudent:', authToken); // Debug
+            console.log('JSON enviado en confirmDeleteStudent:', JSON.stringify(bajaData)); // Debug
+            
+            // Usar el endpoint correcto para la baja lógica
+            const response = await fetch(`${API_BASE_URL}/estudiantes/${studentId}/baja`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bajaData)
+            });
+            
+            console.log('Baja lógica status:', response.status); // Debug
+            
+            if (response.ok) {
+                closeDeleteModal();
+                showAlert('dashboard-alert', 'Estudiante dado de baja exitosamente', 'success');
+                loadStudents();
+            } else if (response.status === 401 || response.status === 403) {
+                showAlert('delete-modal-alert', 'Sesión expirada o no autorizada. Por favor, inicia sesión de nuevo.', 'error');
+                logout();
+            } else {
+                const errorData = await response.json();
+                showAlert('delete-modal-alert', errorData.message || 'Error al dar de baja al estudiante', 'error');
+            }
+        } catch (error) {
+            console.error('Error en baja lógica:', error);
+            showAlert('delete-modal-alert', 'Error de conexión', 'error');
+        } finally {
+            setDeleteLoading(false);
+        }
+    }
+    
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').style.display = 'none';
+        document.getElementById('delete-form').reset();
+        clearAlert('delete-modal-alert');
+    }
+    
+    function setDeleteLoading(loading) {
+        const btnText = document.getElementById('delete-btn-text');
+        const loadingSpinner = document.getElementById('delete-loading');
+        const btn = document.querySelector('.modal-footer .btn-danger');
+        
+        if (loading) {
+            btnText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            btn.disabled = true;
+        } else {
+            btnText.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+            btn.disabled = false;
+        }
+    }
+    
+    // Función auxiliar para formatear fechas
+    function formatDateDDMMYYYY(date) {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${year}-${month}-${day}`;
+    }
+
+    // Modal Functions
+    function openModal(mode) {
+        currentMode = mode;
+        const modal = document.getElementById('student-modal');
+        const title = document.getElementById('modal-title');
+        const form = document.getElementById('student-form');
+
+        if (mode === 'create') {
+            title.textContent = 'Agregar Estudiante';
+            form.reset();
+            document.getElementById('student-id').value = '';
+        } else {
+            title.textContent = 'Editar Estudiante';
+        }
+
+        clearAlert('modal-alert');
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('student-modal').style.display = 'none';
+        document.getElementById('student-form').reset();
+        clearAlert('modal-alert');
+    }
+
+    // Utility Functions
+    function showAlert(containerId, message, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+
+        // Auto-hide success alerts
+        if (type === 'success') {
+            setTimeout(() => clearAlert(containerId), 3000);
+        }
+    }
+
+    function clearAlert(containerId) {
+        document.getElementById(containerId).innerHTML = '';
+    }
+
+    function setLoginLoading(loading) {
+        const btnText = document.getElementById('login-btn-text');
+        const loadingSpinner = document.getElementById('login-loading');
+        const btn = document.querySelector('#login-form .btn');
+
+        if (loading) {
+            btnText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            btn.disabled = true;
+        } else {
+            btnText.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+            btn.disabled = false;
+        }
+    }
+
+    function setSaveLoading(loading) {
+        const btnText = document.getElementById('save-btn-text');
+        const loadingSpinner = document.getElementById('save-loading');
+        const btn = document.querySelector('.modal-footer .btn-success');
+
+        if (loading) {
+            btnText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            btn.disabled = true;
+        } else {
+            btnText.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+            btn.disabled = false;
+        }
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const studentModal = document.getElementById('student-modal');
+        const deleteModal = document.getElementById('delete-modal');
+        
+        if (event.target === studentModal) {
+            closeModal();
+        } else if (event.target === deleteModal) {
+            closeDeleteModal();
+        }
+    }
+</script>
+</body>
+</html>
